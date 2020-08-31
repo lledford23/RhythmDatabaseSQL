@@ -2,11 +2,91 @@
 
 namespace RhythmDatabaseSQL
 {
-  class Program
-  {
-    static void Main(string[] args)
+    class Program
     {
-      Console.WriteLine("Welcome to C#");
-    }
-  }
-}
+        CREATE TABLE "Album" (
+    "Id" serial primary key,
+  "Title" TEXT NOT NULL,
+  "IsExplicit" boolean,
+  "ReleaseDate" date,
+  "Id" int REFERENCES "Band" ("Id")
+);
+
+CREATE TABLE "Band" (
+    "Id" serial primary key,
+  "Name" TEXT,
+  "CountryOfOrigin" TEXT,
+  "NumberOfMembers" INT,
+  "Website" TEXT,
+  "Style" TEXT,
+  "IsSigned" boolean,
+  "ContactName" TEXT,
+  "ContactPhoneNumber" TEXT
+);
+
+ALTER TABLE "Album" ADD COLUMN "AlbumId" INTEGER NULL REFERENCES "Band" ("Id");
+
+INSERT INTO "Band" ("Name", "CountryOfOrigin", "NumberOfMembers", "Website", "Style", "IsSigned", "ContactName", "ContactPhoneNumber")
+VALUES('Goldhouse', 'Netherlands', '2', 'www.Goldhouse.com', 'Techno', 'False', 'Mark Aston', '614-835-1717');
+
+        INSERT INTO "Band" ("Name", "CountryOfOrigin", "NumberOfMembers", "Website", "Style", "IsSigned", "ContactName", "ContactPhoneNumber")
+VALUES('PitBull', 'United States', '1', 'www.MrWorldWide.com', 'Hip Hop', 'True', 'Mr WorldWide', '850-363-4685');
+
+        INSERT INTO "Band" ("Name", "CountryOfOrigin", "NumberOfMembers", "Website", "Style", "IsSigned", "ContactName", "ContactPhoneNumber")
+VALUES('Hamilton Cast', 'United States', '10', 'www.Hamilton.com', 'Hip Hop', 'False', 'Lin-Manuel Miranda', '212-253-4658');
+
+        INSERT INTO "Band" ("Name", "CountryOfOrigin", "NumberOfMembers", "Website", "Style", "IsSigned", "ContactName", "ContactPhoneNumber")
+VALUES('Black Eyed Peas', 'United States', '3', 'www.BlackEyedPeas.com', 'Hip Hop', 'True', 'Fergie', '808-465-5143');
+
+        SELECT* FROM "Band"
+
+INSERT INTO "Album" ("Title", "IsExplicit", "ReleaseDate")
+VALUES('Lose Control', 'False', '2017-04-01');
+
+        INSERT INTO "Album" ("Title", "IsExplicit", "ReleaseDate")
+VALUES('2016 Cast of Hamilton', 'False', '2016-02-15');
+
+        INSERT INTO "Album" ("Title", "IsExplicit", "ReleaseDate")
+VALUES('Cast the sun', 'True', '2017-12-01');
+
+        UPDATE "Band" SET "IsSigned" = 'False' WHERE "Name" = 'PitBull';
+
+UPDATE "Band" SET "IsSigned" = 'True' WHERE "Name" = 'Goldhouse';
+
+SELECT* FROM "Band" WHERE "Name" = "BlackEyedPeas";
+
+SELECT* FROM "Album" ORDER BY "ReleaseDate";
+
+        SELECT* FROM "Band" WHERE "IsSigned" = 'True';
+SELECT* FROM "Band" WHERE "IsSigned" = 'False';
+
+CREATE TABLE "Song" (
+  "Id" serial primary key,
+"Album Title" text REFERENCES "Album" ("Title"),
+"Title" text,
+"Lyrics" text,
+"Length" text,
+"Genre" text REFERENCE "Band" ("Style")
+);
+
+INSERT INTO "Song" ("Album Title","Title", "Lyrics", "Length", "Genre")
+VALUES('Lose Control', 'Losing my way', 'When you walked out that door..', '3 mins 10 seconds', 'Hip Hop');
+
+        INSERT INTO "Song" ("Album Title","Title", "Lyrics", "Length", "Genre")
+VALUES('2016 Cast of Hamilton','Youll be back', 'You say, the price of my love..', '2 mins 35 seconds', 'Power Ballad');
+
+        Create Table "Musicians" (
+    "Id" serial primary key,
+  "Name" text,
+  "Band" text REFERENCE "Band" ("Name"),
+  "Album" text REFERENCES "Album" ("Title"),
+  "Years" int
+);
+
+SELECT "Band"."Genre"
+FROM "Band"
+JOIN "Song" ON "Band"."Style" = "Song"."Genre";
+
+SELECT* FROM "Album" = "Power Ballad";
+
+        SELECT* FROM "Musicians"."Band" = '2016 Cast of Hamilton';

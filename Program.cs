@@ -1,92 +1,178 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using Microsoft.Extensions.Logging;
+
 
 namespace RhythmDatabaseSQL
 {
+    class Band
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string CountryOfOrgins { get; set; }
+        public int NumberOfMembers { get; set; }
+        public string Website { get; set; }
+        public string Style { get; set; }
+        public bool IsSigned { get; set; }
+        public string ContactName { get; set; }
+        public string ContactPhoneNumber { get; set; }
+
+    }
+    class Album
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Lyrics { get; set; }
+        public string Length { get; set; }
+        public string Genre { get; set; }
+    }
+    class RhythmDatabaseSQL : DbContext
+    {
+        public DbSet<Album> Albums { get; set; }
+        public DbSet<Band> Bands { get; set; }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            optionsBuilder.UseLoggerFactory(loggerFactory);
+
+            optionsBuilder.UseNpgsql("server=localhost;database=RhythmDatabaseSQL");
+        }
+    }
     class Program
     {
-        CREATE TABLE "Album" (
-    "Id" serial primary key,
-  "Title" TEXT NOT NULL,
-  "IsExplicit" boolean,
-  "ReleaseDate" date,
-  "Id" int REFERENCES "Band" ("Id")
-);
+        static void Main(string[] args)
+        {
+            var context = new RhythmDatabaseSQL();
+            var ourBands = context.Bands;
+            var ourAlbums = context.Albums;
+            bool mainMenu = true;
 
-CREATE TABLE "Band" (
-    "Id" serial primary key,
-  "Name" TEXT,
-  "CountryOfOrigin" TEXT,
-  "NumberOfMembers" INT,
-  "Website" TEXT,
-  "Style" TEXT,
-  "IsSigned" boolean,
-  "ContactName" TEXT,
-  "ContactPhoneNumber" TEXT
-);
+            while (mainMenu)
+            {
+                Console.WriteLine("Add - (NB) New Band");
+                Console.WriteLine("Add - (NA) New Album");
+                Console.WriteLine("View - (VB) View All Bands");
+                Console.WriteLine("View - (VA) View All Albums");
+                Console.WriteLine("View - (AS) View all signed bands");
+                Console.WriteLine("View - (NS) View all not signed bands");
+                Console.WriteLine("Let band go - (CC) Cancel contract");
+                Console.WriteLine("Resign band - (UC) Update Contract");
+                Console.WriteLine("Exit - (E) Exit");
+                Console.WriteLine("What would you like to do today?");
+                var choice = Console.ReadLine();
 
-ALTER TABLE "Album" ADD COLUMN "AlbumId" INTEGER NULL REFERENCES "Band" ("Id");
+                switch (choice.ToUpper())
+                {
+                    case "E":
+                        mainMenu = false;
+                        break;
 
-INSERT INTO "Band" ("Name", "CountryOfOrigin", "NumberOfMembers", "Website", "Style", "IsSigned", "ContactName", "ContactPhoneNumber")
-VALUES('Goldhouse', 'Netherlands', '2', 'www.Goldhouse.com', 'Techno', 'False', 'Mark Aston', '614-835-1717');
+                    case "NB":
+                        Console.WriteLine("What is the name of the band you would like to add?:");
+                        var newBandName = Console.ReadLine();
+                        Console.WriteLine("What is the Country of Orgins?");
+                        var newBandOrgins = Console.ReadLine();
+                        Console.WriteLine("How many members?");
+                        var newBandMembers = Console.ReadLine();
+                        Console.WriteLine("Website?");
+                        var newBandWebsite = Console.ReadLine();
+                        Console.WriteLine("Style?");
+                        var newBandStyle = Console.ReadLine();
+                        Console.WriteLine("Signed?");
+                        var newBandSigned = Console.ReadLine();
+                        Console.WriteLine("Who is the contact for this band?");
+                        var newBandContact = Console.ReadLine();
+                        Console.WriteLine("Phone Number?");
+                        var newBandPhoneNumber = Console.ReadLine();
 
-        INSERT INTO "Band" ("Name", "CountryOfOrigin", "NumberOfMembers", "Website", "Style", "IsSigned", "ContactName", "ContactPhoneNumber")
-VALUES('PitBull', 'United States', '1', 'www.MrWorldWide.com', 'Hip Hop', 'True', 'Mr WorldWide', '850-363-4685');
+                        var newBand = new Band()
+                        {
+                            Name = newBandName,
+                            CountryOfOrgins = newBandOrgins,
+                            NumberOfMembers = int.Parse(newBandMembers),
+                            Website = newBandWebsite,
+                            Style = newBandStyle,
+                            IsSigned = newBandSigned,
+                            ContactName = newBandContact,
+                            ContactPhoneNumber = newBandPhoneNumber,
+                        };
+                        context.Bands.Add(newBand);
+                        context.SaveChanges();
+                        break;
 
-        INSERT INTO "Band" ("Name", "CountryOfOrigin", "NumberOfMembers", "Website", "Style", "IsSigned", "ContactName", "ContactPhoneNumber")
-VALUES('Hamilton Cast', 'United States', '10', 'www.Hamilton.com', 'Hip Hop', 'False', 'Lin-Manuel Miranda', '212-253-4658');
+                    case "NA":
+                        Console.WriteLine("What is the name of the album title you would like to add?:");
+                        var newAlbumTitle = Console.ReadLine();
+                        Console.WriteLine("What are the lyrics?");
+                        var newAlbumLyrics = Console.ReadLine();
+                        Console.WriteLine("What is the length of album in minutes?");
+                        var newAlbumLength = Console.ReadLine();
+                        Console.WriteLine("Genre?");
+                        var newAlbumGenre = Console.ReadLine();
 
-        INSERT INTO "Band" ("Name", "CountryOfOrigin", "NumberOfMembers", "Website", "Style", "IsSigned", "ContactName", "ContactPhoneNumber")
-VALUES('Black Eyed Peas', 'United States', '3', 'www.BlackEyedPeas.com', 'Hip Hop', 'True', 'Fergie', '808-465-5143');
+                        var newAlbum = new Album()
+                        {
+                            Title = newAlbumTitle,
+                            Lyrics = newAlbumLyrics,
+                            Length = newAlbumLength,
+                            Genre = newAlbumGenre,
+                        };
+                        context.Albums.Add(newAlbum);
+                        context.SaveChanges();
+                        break;
 
-        SELECT* FROM "Band"
+                    case "VB":
+                        foreach (var band in ourBands)
+                        {
+                            Console.WriteLine($"These are the bands within our database: {band.Name}");
+                        }
+                        break;
 
-INSERT INTO "Album" ("Title", "IsExplicit", "ReleaseDate")
-VALUES('Lose Control', 'False', '2017-04-01');
+                    case "VA":
+                        foreach (var album in ourAlbums)
+                        {
+                            Console.WriteLine($"These are the albums within our database: {album.Title}");
+                        }
+                        break;
 
-        INSERT INTO "Album" ("Title", "IsExplicit", "ReleaseDate")
-VALUES('2016 Cast of Hamilton', 'False', '2016-02-15');
+                    case "AS":
+                        var signedBands = ourBands.Where(band => band.IsSigned == true);
+                        Console.WriteLine($"{signedBands}");
+                        break;
 
-        INSERT INTO "Album" ("Title", "IsExplicit", "ReleaseDate")
-VALUES('Cast the sun', 'True', '2017-12-01');
+                    case "NS":
+                        var notSignedBands = ourBands.Where(band => band.IsSigned == false);
+                        Console.WriteLine($"{notSignedBands}");
+                        break;
 
-        UPDATE "Band" SET "IsSigned" = 'False' WHERE "Name" = 'PitBull';
+                    case "CC":
+                        Console.WriteLine("What is the name of the band you'd like to let go?");
+                        var bandLetGo = Console.ReadLine();
+                        var cancelContract = context.Bands.FirstOrDefault(band => band.Name == bandLetGo);
+                        if (cancelContract != null)
+                        {
+                            cancelContract.IsSigned = false;
+                            context.Entry(cancelContract).State = EntityState.Modified;
+                            context.SaveChanges();
+                        }
+                        break;
 
-UPDATE "Band" SET "IsSigned" = 'True' WHERE "Name" = 'Goldhouse';
+                    case "UC":
+                        Console.WriteLine("What is the name of the band you'd like to re-sign");
+                        var bandResign = Console.ReadLine();
+                        var resignBand = context.Bands.FirstOrDefault(band => band.Name == bandResign);
+                        if (resignBand != null)
+                        {
+                            resignBand.IsSigned = true;
+                            context.Entry(resignBand).State = EntityState.Modified;
+                            context.SaveChanges();
+                        }
+                        break;
+                }
 
-SELECT* FROM "Band" WHERE "Name" = "BlackEyedPeas";
+            }
+        }
 
-SELECT* FROM "Album" ORDER BY "ReleaseDate";
-
-        SELECT* FROM "Band" WHERE "IsSigned" = 'True';
-SELECT* FROM "Band" WHERE "IsSigned" = 'False';
-
-CREATE TABLE "Song" (
-  "Id" serial primary key,
-"Album Title" text REFERENCES "Album" ("Title"),
-"Title" text,
-"Lyrics" text,
-"Length" text,
-"Genre" text REFERENCE "Band" ("Style")
-);
-
-INSERT INTO "Song" ("Album Title","Title", "Lyrics", "Length", "Genre")
-VALUES('Lose Control', 'Losing my way', 'When you walked out that door..', '3 mins 10 seconds', 'Hip Hop');
-
-        INSERT INTO "Song" ("Album Title","Title", "Lyrics", "Length", "Genre")
-VALUES('2016 Cast of Hamilton','Youll be back', 'You say, the price of my love..', '2 mins 35 seconds', 'Power Ballad');
-
-        Create Table "Musicians" (
-    "Id" serial primary key,
-  "Name" text,
-  "Band" text REFERENCE "Band" ("Name"),
-  "Album" text REFERENCES "Album" ("Title"),
-  "Years" int
-);
-
-SELECT "Band"."Genre"
-FROM "Band"
-JOIN "Song" ON "Band"."Style" = "Song"."Genre";
-
-SELECT* FROM "Album" = "Power Ballad";
-
-        SELECT* FROM "Musicians"."Band" = '2016 Cast of Hamilton';
+    }
+}
